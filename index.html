@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sandėlis">
+  <title>Sandėlio krovimas</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-top">
+      <h1>📦 Sandėlio krovimas</h1>
+      <button id="installBtn" class="install-btn" hidden>Įdiegti</button>
+    </div>
+    <p class="subtitle">Ką reikia pasikrauti rytoj išvykstant</p>
+  </header>
+
+  <main>
+    <section class="progress-card" id="progressCard" hidden>
+      <div class="progress-info">
+        <span id="progressText">0 / 0 pakrauta</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </section>
+
+    <section class="add-card">
+      <h2>Pridėti įrangą</h2>
+      <form id="addForm">
+        <label>
+          <span>Sandėlis</span>
+          <input type="text" id="warehouse" list="warehouseList" placeholder="pvz. Vilnius A1" autocomplete="off" required>
+          <datalist id="warehouseList"></datalist>
+        </label>
+        <label>
+          <span>Įranga</span>
+          <input type="text" id="equipment" placeholder="pvz. Gręžtuvas" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Kiekis</span>
+          <input type="number" id="quantity" inputmode="numeric" min="1" step="1" value="1" required>
+        </label>
+        <button type="submit" class="add-btn">+ Pridėti į sąrašą</button>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <div class="list-toolbar">
+        <h2>Krovimo sąrašas</h2>
+        <div class="toolbar-actions">
+          <button id="filterBtn" class="ghost-btn" data-mode="all">Rodyti: visi</button>
+          <button id="clearDoneBtn" class="ghost-btn">Išvalyti pakrautus</button>
+        </div>
+      </div>
+
+      <div class="table-head">
+        <span class="col-check"></span>
+        <span class="col-wh">Sandėlis</span>
+        <span class="col-eq">Įranga</span>
+        <span class="col-qty">Kiekis</span>
+        <span class="col-del"></span>
+      </div>
+
+      <ul id="itemList" class="item-list"></ul>
+
+      <p id="emptyState" class="empty-state">
+        Sąrašas tuščias.<br>Pridėkite pirmą įrangą aukščiau. ⬆️
+      </p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Duomenys saugomi jūsų telefone · veikia be interneto</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
