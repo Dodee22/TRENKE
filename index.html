@@ -15,63 +15,93 @@
 <body>
   <header class="app-header">
     <div class="header-top">
-      <h1>📦 Sandėlio krovimas</h1>
+      <button id="backBtn" class="back-btn" hidden aria-label="Atgal">‹</button>
+      <h1 id="headerTitle">📦 Renginiai</h1>
       <button id="installBtn" class="install-btn" hidden>Įdiegti</button>
     </div>
-    <p class="subtitle">Ką reikia pasikrauti rytoj išvykstant</p>
+    <p class="subtitle" id="headerSubtitle">Ką reikia pasikrauti kiekvienam renginiui</p>
   </header>
 
   <main>
-    <section class="progress-card" id="progressCard" hidden>
-      <div class="progress-info">
-        <span id="progressText">0 / 0 pakrauta</span>
-        <span id="progressPercent">0%</span>
+    <!-- ============ RENGINIŲ SĄRAŠAS ============ -->
+    <section id="eventsView">
+      <div class="add-card">
+        <h2>Pridėti renginį</h2>
+        <form id="addEventForm">
+          <label>
+            <span>Renginio pavadinimas</span>
+            <input type="text" id="eventName" placeholder="pvz. Koncertas Kaune" autocomplete="off" required>
+          </label>
+          <label>
+            <span>Data (nebūtina)</span>
+            <input type="date" id="eventDate">
+          </label>
+          <button type="submit" class="add-btn">+ Pridėti renginį</button>
+        </form>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+      <section class="list-section">
+        <h2>Renginių sąrašas</h2>
+        <ul id="eventList" class="event-list"></ul>
+        <p id="eventsEmpty" class="empty-state">
+          Renginių dar nėra.<br>Pridėk pirmą renginį aukščiau. ⬆️
+        </p>
+      </section>
     </section>
 
-    <section class="add-card">
-      <h2>Pridėti įrangą</h2>
-      <form id="addForm">
-        <label>
-          <span>Sandėlis</span>
-          <input type="text" id="warehouse" list="warehouseList" placeholder="pvz. Vilnius A1" autocomplete="off" required>
-          <datalist id="warehouseList"></datalist>
-        </label>
-        <label>
-          <span>Įranga</span>
-          <input type="text" id="equipment" placeholder="pvz. Gręžtuvas" autocomplete="off" required>
-        </label>
-        <label>
-          <span>Kiekis</span>
-          <input type="number" id="quantity" inputmode="numeric" min="1" step="1" value="1" required>
-        </label>
-        <button type="submit" class="add-btn">+ Pridėti į sąrašą</button>
-      </form>
-    </section>
-
-    <section class="list-section">
-      <div class="list-toolbar">
-        <h2>Krovimo sąrašas</h2>
-        <div class="toolbar-actions">
-          <button id="filterBtn" class="ghost-btn" data-mode="all">Rodyti: visi</button>
-          <button id="clearDoneBtn" class="ghost-btn">Išvalyti pakrautus</button>
+    <!-- ============ VIENO RENGINIO ĮRANGA ============ -->
+    <section id="detailView" hidden>
+      <section class="progress-card" id="progressCard" hidden>
+        <div class="progress-info">
+          <span id="progressText">0 / 0 pakrauta</span>
+          <span id="progressPercent">0%</span>
         </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </section>
+
+      <div class="add-card">
+        <h2>Pridėti įrangą</h2>
+        <form id="addItemForm">
+          <label>
+            <span>Sandėlis</span>
+            <input type="text" id="warehouse" list="warehouseList" placeholder="pvz. Vilnius A1" autocomplete="off" required>
+            <datalist id="warehouseList"></datalist>
+          </label>
+          <label>
+            <span>Įranga</span>
+            <input type="text" id="equipment" placeholder="pvz. Gręžtuvas" autocomplete="off" required>
+          </label>
+          <label>
+            <span>Kiekis</span>
+            <input type="number" id="quantity" inputmode="numeric" min="1" step="1" value="1" required>
+          </label>
+          <button type="submit" class="add-btn">+ Pridėti į sąrašą</button>
+        </form>
       </div>
 
-      <div class="table-head">
-        <span class="col-check"></span>
-        <span class="col-wh">Sandėlis</span>
-        <span class="col-eq">Įranga</span>
-        <span class="col-qty">Kiekis</span>
-        <span class="col-del"></span>
-      </div>
+      <section class="list-section">
+        <div class="list-toolbar">
+          <h2>Krovimo sąrašas</h2>
+          <div class="toolbar-actions">
+            <button id="filterBtn" class="ghost-btn" data-mode="all">Rodyti: visi</button>
+            <button id="clearDoneBtn" class="ghost-btn">Išvalyti pakrautus</button>
+          </div>
+        </div>
 
-      <ul id="itemList" class="item-list"></ul>
+        <div class="table-head">
+          <span class="col-check"></span>
+          <span class="col-wh">Sandėlis</span>
+          <span class="col-eq">Įranga</span>
+          <span class="col-qty">Kiekis</span>
+          <span class="col-del"></span>
+        </div>
 
-      <p id="emptyState" class="empty-state">
-        Sąrašas tuščias.<br>Pridėkite pirmą įrangą aukščiau. ⬆️
-      </p>
+        <ul id="itemList" class="item-list"></ul>
+
+        <p id="itemsEmpty" class="empty-state">
+          Sąrašas tuščias.<br>Pridėk pirmą įrangą aukščiau. ⬆️
+        </p>
+      </section>
     </section>
   </main>
 

@@ -1,10 +1,16 @@
 # 📦 Sandėlio krovimas
 
 Paprasta telefono programėlė (PWA), skirta susižymėti, **kokią įrangą reikia
-pasikrauti rytoj išvykstant iš sandėlio**. Kraunant įrangą tiesiog žymi
-varneles — matai progresą realiu laiku.
+pasikrauti iš sandėlio**. Įranga tvarkoma **pagal renginius** — kiekvienas
+renginys turi savo atskirą krovimo sąrašą, tad per dieną gali turėti kelis
+renginius su skirtinga įranga. Kraunant tiesiog žymi varneles — matai
+progresą realiu laiku.
 
-Kiekvienas įrašas turi tris stulpelius:
+**Renginiai:** pagrindiniame ekrane matai visų renginių sąrašą su data ir
+progresu (pvz. `3 / 8`). Paspaudus renginį, atsidaro būtent to renginio
+įrangos sąrašas.
+
+Kiekvienas įrangos įrašas turi tris stulpelius:
 
 | Stulpelis | Reikšmė |
 |-----------|---------|
@@ -16,6 +22,7 @@ Prie kiekvieno įrašo yra **varnelė** — pažymi, kai pakrauni.
 
 ## Ypatybės
 
+- 🎪 **Renginiai** — kiekvienas su savo atskiru įrangos sąrašu
 - ✅ Varnelės kraunant + progreso juosta (kiek jau pakrauta)
 - 💾 Duomenys saugomi **jūsų telefone** (`localStorage`) — niekur nesiunčiami
 - 📴 **Veikia be interneto** (offline) po pirmo atidarymo
