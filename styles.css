@@ -120,6 +120,30 @@ h2 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--text);
 }
 .mode-opt.active { background: var(--card); color: var(--teal-dark); box-shadow: var(--shadow); }
 
+/* Krovimo lapo mygtukai */
+.sheet-actions { display: flex; gap: 8px; }
+.sheet-actions .ghost-btn { flex: 1; padding: 11px; font-size: 0.85rem; }
+
+/* Spausdinimo sritis – nematoma ekrane, matoma tik spausdinant */
+#printArea { display: none; }
+
+@media print {
+  body { max-width: none; }
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block !important; color: #000; padding: 0; }
+  .sheet { font-family: -apple-system, Arial, sans-serif; }
+  .sheet h1 { font-size: 20px; margin-bottom: 2px; }
+  .sheet .sub { font-size: 14px; color: #333; margin-bottom: 16px; }
+  .sheet h2 { font-size: 15px; margin: 16px 0 6px; }
+  .sheet table { width: 100%; border-collapse: collapse; }
+  .sheet th, .sheet td { text-align: left; padding: 6px 4px; border-bottom: 1px solid #ccc; font-size: 13px; }
+  .sheet th:last-child, .sheet td.qty { text-align: right; }
+  .sheet td.chk { width: 24px; font-size: 18px; }
+  .sheet td.qty { font-weight: bold; width: 50px; }
+  .sheet .case { color: #666; font-size: 11px; }
+  .sheet .total { margin-top: 16px; font-weight: bold; font-size: 14px; }
+}
+
 /* Konflikto įspėjimas */
 .conflict-banner {
   background: #fef2f2;

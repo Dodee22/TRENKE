@@ -63,6 +63,11 @@
 
       <div id="conflictBanner" class="conflict-banner" hidden></div>
 
+      <div class="sheet-actions">
+        <button type="button" id="shareBtn" class="ghost-btn">📤 Siųsti sąrašą</button>
+        <button type="button" id="printBtn" class="ghost-btn">🖨️ PDF / spausdinti</button>
+      </div>
+
       <section class="progress-card" id="progressCard" hidden>
         <div class="progress-info">
           <span id="progressText">0 / 0 pakrauta</span>
@@ -173,6 +178,9 @@
       </p>
     </section>
   </main>
+
+  <!-- Spausdinimo sritis (matoma tik spausdinant / PDF) -->
+  <div id="printArea"></div>
 
   <!-- Redagavimo langelis -->
   <div id="editModal" class="modal-overlay" hidden>

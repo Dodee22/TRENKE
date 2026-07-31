@@ -107,6 +107,9 @@ const el = {
   openSummaryBtn: document.getElementById('openSummaryBtn'),
   conflictBanner: document.getElementById('conflictBanner'),
   catStock: document.getElementById('catStock'),
+  shareBtn: document.getElementById('shareBtn'),
+  printBtn: document.getElementById('printBtn'),
+  printArea: document.getElementById('printArea'),
   headerTitle: document.getElementById('headerTitle'),
   headerSubtitle: document.getElementById('headerSubtitle'),
   backBtn: document.getElementById('backBtn'),
@@ -676,6 +679,77 @@ el.clearDoneBtn.addEventListener('click', () => {
     renderItems();
   }
 });
+
+// --- Krovimo lapas: bendrinti / PDF -------------------------------------
+// Įranga sugrupuota pagal sandėlį
+function itemsByWarehouse(ev) {
+  const wh = {};
+  ev.items.forEach((it) => {
+    const w = it.warehouse || '(be sandėlio)';
+    (wh[w] = wh[w] || []).push(it);
+  });
+  return wh;
+}
+
+function buildSheetText(ev) {
+  const lines = ['KROVIMO LAPAS', ev.name + (ev.date ? ` — ${formatDate(ev.date)}` : ''), ''];
+  const wh = itemsByWarehouse(ev);
+  Object.keys(wh).sort().forEach((w) => {
+    lines.push(`▪ ${w}:`);
+    wh[w].forEach((it) => {
+      lines.push(`   [ ] ${it.equipment} × ${it.quantity}${it.caseName ? ` (${it.caseName})` : ''}`);
+    });
+    lines.push('');
+  });
+  const total = ev.items.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  lines.push(`Iš viso: ${ev.items.length} poz., ${total} vnt.`);
+  return lines.join('\n');
+}
+
+async function shareSheet() {
+  const ev = currentEvent();
+  if (!ev || ev.items.length === 0) { alert('Sąrašas tuščias.'); return; }
+  const text = buildSheetText(ev);
+  if (navigator.share) {
+    try { await navigator.share({ title: `Krovimo lapas – ${ev.name}`, text }); } catch (e) { /* atšaukta */ }
+  } else if (navigator.clipboard && navigator.clipboard.writeText) {
+    try { await navigator.clipboard.writeText(text); alert('Sąrašas nukopijuotas – įklijuok į žinutę ar el. laišką.'); }
+    catch (e) { window.prompt('Nukopijuok sąrašą:', text); }
+  } else {
+    window.prompt('Nukopijuok sąrašą:', text);
+  }
+}
+
+function buildPrintHtml(ev) {
+  const wh = itemsByWarehouse(ev);
+  const total = ev.items.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  const sections = Object.keys(wh).sort().map((w) => {
+    const rows = wh[w].map((it) => `
+      <tr>
+        <td class="chk">☐</td>
+        <td>${escapeHtml(it.equipment)}${it.caseName ? ` <span class="case">📦 ${escapeHtml(it.caseName)}</span>` : ''}</td>
+        <td class="qty">${it.quantity}</td>
+      </tr>`).join('');
+    return `<h2>🏬 ${escapeHtml(w)}</h2>
+      <table><thead><tr><th></th><th>Įranga</th><th>Kiekis</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }).join('');
+  return `<div class="sheet">
+      <h1>Krovimo lapas</h1>
+      <div class="sub">${escapeHtml(ev.name)}${ev.date ? ` — ${formatDate(ev.date)}` : ''}</div>
+      ${sections}
+      <div class="total">Iš viso: ${ev.items.length} poz., ${total} vnt.</div>
+    </div>`;
+}
+
+function printSheet() {
+  const ev = currentEvent();
+  if (!ev || ev.items.length === 0) { alert('Sąrašas tuščias.'); return; }
+  el.printArea.innerHTML = buildPrintHtml(ev);
+  window.print();
+}
+
+el.shareBtn.addEventListener('click', shareSheet);
+el.printBtn.addEventListener('click', printSheet);
 
 // --- PWA install ---------------------------------------------------------
 let deferredPrompt = null;
