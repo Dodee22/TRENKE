@@ -99,6 +99,27 @@ main { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
 
 h2 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
 
+/* Režimo perjungiklis (Krovimas / Grąžinimas) */
+.mode-toggle {
+  display: flex;
+  background: var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+.mode-opt {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.mode-opt.active { background: var(--card); color: var(--teal-dark); box-shadow: var(--shadow); }
+
 /* Progress */
 .progress-card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
 .progress-info { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
@@ -190,11 +211,14 @@ h2 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--text);
   flex-shrink: 0;
 }
 .item-check.checked { background: var(--done); border-color: var(--done); }
+.item-check.return.checked { background: #2563eb; border-color: #2563eb; }
 
 .item-wh { font-weight: 600; word-break: break-word; }
 .item-eq { word-break: break-word; }
 .item-wh[data-action], .item-eq[data-action], .item-qty[data-action] { cursor: pointer; }
-.item-eq { display: flex; align-items: center; gap: 6px; }
+.item-eq { display: flex; flex-direction: column; gap: 2px; }
+.eq-line { display: flex; align-items: center; gap: 6px; }
+.item-case { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
 .cat-dot {
   display: inline-block;
   width: 10px;

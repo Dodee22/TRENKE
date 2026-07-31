@@ -55,6 +55,11 @@
 
     <!-- ============ VIENO RENGINIO ĮRANGA ============ -->
     <section id="detailView" hidden>
+      <div class="mode-toggle" id="modeToggle">
+        <button type="button" class="mode-opt active" data-mode="load">📦 Krovimas</button>
+        <button type="button" class="mode-opt" data-mode="return">↩️ Grąžinimas</button>
+      </div>
+
       <section class="progress-card" id="progressCard" hidden>
         <div class="progress-info">
           <span id="progressText">0 / 0 pakrauta</span>
@@ -86,6 +91,11 @@
               <select id="itemCategory"></select>
             </label>
           </div>
+          <label>
+            <span>Dėžė / case (nebūtina)</span>
+            <input type="text" id="itemCase" list="caseList" placeholder="pvz. Case 3" autocomplete="off">
+            <datalist id="caseList"></datalist>
+          </label>
           <button type="submit" class="add-btn">+ Pridėti į sąrašą</button>
         </form>
       </div>
@@ -172,6 +182,10 @@
             <select id="editCategory"></select>
           </label>
         </div>
+        <label>
+          <span>Dėžė / case (nebūtina)</span>
+          <input type="text" id="editCase" list="caseList" autocomplete="off">
+        </label>
         <div class="modal-actions">
           <button type="button" id="editCancel" class="ghost-btn">Atšaukti</button>
           <button type="submit" class="add-btn modal-save">Išsaugoti</button>
