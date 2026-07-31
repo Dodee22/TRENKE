@@ -27,6 +27,7 @@
     <section id="eventsView">
       <div class="nav-row">
         <button id="openCatalogBtn" class="nav-btn">📚 Katalogas</button>
+        <button id="openSummaryBtn" class="nav-btn">📊 Suvestinė</button>
       </div>
 
       <div class="add-card">
@@ -59,6 +60,8 @@
         <button type="button" class="mode-opt active" data-mode="load">📦 Krovimas</button>
         <button type="button" class="mode-opt" data-mode="return">↩️ Grąžinimas</button>
       </div>
+
+      <div id="conflictBanner" class="conflict-banner" hidden></div>
 
       <section class="progress-card" id="progressCard" hidden>
         <div class="progress-info">
@@ -145,6 +148,10 @@
               <input type="text" id="catWarehouse" list="warehouseList" placeholder="pvz. Vilnius A1" autocomplete="off">
             </label>
           </div>
+          <label>
+            <span>Kiek turim (nebūtina, dvigubo užsakymo tikrinimui)</span>
+            <input type="number" id="catStock" inputmode="numeric" min="0" step="1" placeholder="pvz. 24">
+          </label>
           <button type="submit" class="add-btn">+ Pridėti į katalogą</button>
         </form>
       </div>
@@ -156,6 +163,14 @@
           Katalogas tuščias.<br>Pridėk savo įrangą — vėliau ją greitai rinksies sudarydamas renginius. ⬆️
         </p>
       </section>
+    </section>
+
+    <!-- ============ DIENOS / TRANSPORTO SUVESTINĖ ============ -->
+    <section id="summaryView" hidden>
+      <div id="summaryContent"></div>
+      <p id="summaryEmpty" class="empty-state">
+        Suvestinė tuščia.<br>Pridėk renginių su įranga — čia matysi, kiek ko reikia iš kiekvieno sandėlio. 📊
+      </p>
     </section>
   </main>
 

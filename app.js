@@ -101,6 +101,12 @@ const el = {
   eventsView: document.getElementById('eventsView'),
   detailView: document.getElementById('detailView'),
   catalogView: document.getElementById('catalogView'),
+  summaryView: document.getElementById('summaryView'),
+  summaryContent: document.getElementById('summaryContent'),
+  summaryEmpty: document.getElementById('summaryEmpty'),
+  openSummaryBtn: document.getElementById('openSummaryBtn'),
+  conflictBanner: document.getElementById('conflictBanner'),
+  catStock: document.getElementById('catStock'),
   headerTitle: document.getElementById('headerTitle'),
   headerSubtitle: document.getElementById('headerSubtitle'),
   backBtn: document.getElementById('backBtn'),
@@ -186,6 +192,7 @@ function showEvents() {
   currentEventId = null;
   el.detailView.hidden = true;
   el.catalogView.hidden = true;
+  el.summaryView.hidden = true;
   el.eventsView.hidden = false;
   el.backBtn.hidden = true;
   el.headerTitle.textContent = '📦 Renginiai';
@@ -196,6 +203,7 @@ function showEvents() {
 function showCatalog() {
   el.eventsView.hidden = true;
   el.detailView.hidden = true;
+  el.summaryView.hidden = true;
   el.catalogView.hidden = false;
   el.backBtn.hidden = false;
   el.headerTitle.textContent = '📚 Katalogas';
@@ -203,6 +211,17 @@ function showCatalog() {
   fillCategorySelect(el.catCategory, '');
   refreshDatalists();
   renderCatalog();
+}
+
+function showSummary() {
+  el.eventsView.hidden = true;
+  el.detailView.hidden = true;
+  el.catalogView.hidden = true;
+  el.summaryView.hidden = false;
+  el.backBtn.hidden = false;
+  el.headerTitle.textContent = '📊 Suvestinė';
+  el.headerSubtitle.textContent = 'Kiek ko reikia per dieną iš kiekvieno sandėlio';
+  renderSummary();
 }
 
 function openEvent(id) {
@@ -215,6 +234,7 @@ function openEvent(id) {
   syncGroupBtn();
   el.eventsView.hidden = true;
   el.catalogView.hidden = true;
+  el.summaryView.hidden = true;
   el.detailView.hidden = false;
   el.backBtn.hidden = false;
   el.headerTitle.textContent = ev.name;
@@ -303,6 +323,8 @@ function renderItems() {
   el.progressText.textContent = `${done} / ${total} ${word}`;
   el.progressPercent.textContent = `${pct}%`;
   el.progressFill.style.width = `${pct}%`;
+
+  renderConflictBanner(ev);
 }
 
 function itemRowHtml(item) {
@@ -327,6 +349,82 @@ function itemRowHtml(item) {
     </li>`;
 }
 
+// --- Dvigubo užsakymo aptikimas -----------------------------------------
+// Grąžina konfliktus tai pačiai datai: kur reikiamas kiekis viršija turimą (katalogo „stock")
+function conflictsForDate(dateKey) {
+  const evs = data.events.filter((e) => (e.date || '(be datos)') === dateKey);
+  const sums = {};
+  evs.forEach((ev) => ev.items.forEach((it) => {
+    const key = it.equipment.trim().toLowerCase();
+    sums[key] = (sums[key] || 0) + (Number(it.quantity) || 0);
+  }));
+  const conflicts = [];
+  data.catalog.forEach((c) => {
+    const stock = Number(c.stock) || 0;
+    if (stock > 0) {
+      const need = sums[c.name.trim().toLowerCase()] || 0;
+      if (need > stock) conflicts.push({ name: c.name, need, stock });
+    }
+  });
+  return conflicts;
+}
+
+function renderConflictBanner(ev) {
+  if (!ev || !ev.date) { el.conflictBanner.hidden = true; return; }
+  const conflicts = conflictsForDate(ev.date);
+  if (conflicts.length === 0) { el.conflictBanner.hidden = true; return; }
+  el.conflictBanner.hidden = false;
+  el.conflictBanner.innerHTML =
+    `<strong>⚠️ Dvigubas užsakymas ${formatDate(ev.date)}</strong>` +
+    conflicts.map((c) => `<div>${escapeHtml(c.name)}: reikia <b>${c.need}</b>, turim <b>${c.stock}</b></div>`).join('');
+}
+
+// --- Rendering: summary --------------------------------------------------
+function renderSummary() {
+  const hasItems = data.events.some((e) => e.items.length > 0);
+  el.summaryEmpty.hidden = hasItems;
+  if (!hasItems) { el.summaryContent.innerHTML = ''; return; }
+
+  // grupuojam renginius pagal datą
+  const byDate = {};
+  data.events.forEach((ev) => {
+    const d = ev.date || '(be datos)';
+    (byDate[d] = byDate[d] || []).push(ev);
+  });
+
+  const dateKeys = Object.keys(byDate).sort();
+  el.summaryContent.innerHTML = dateKeys.map((d) => {
+    const evs = byDate[d];
+    // agreguojam pagal sandėlį -> įranga -> kiekis
+    const wh = {};
+    let totalQty = 0;
+    evs.forEach((ev) => ev.items.forEach((it) => {
+      const w = it.warehouse || '(be sandėlio)';
+      wh[w] = wh[w] || {};
+      wh[w][it.equipment] = (wh[w][it.equipment] || 0) + (Number(it.quantity) || 0);
+      totalQty += Number(it.quantity) || 0;
+    }));
+    const conflicts = conflictsForDate(d);
+    const conflictHtml = conflicts.length
+      ? `<div class="summary-conflict">⚠️ Dvigubas užsakymas:${conflicts.map((c) =>
+          ` <span>${escapeHtml(c.name)} (reikia ${c.need}, turim ${c.stock})</span>`).join(';')}</div>`
+      : '';
+    const whHtml = Object.keys(wh).sort().map((w) => {
+      const rows = Object.keys(wh[w]).sort().map((eq) =>
+        `<div class="summary-item"><span>${escapeHtml(eq)}</span><span class="summary-qty">${wh[w][eq]}</span></div>`).join('');
+      return `<div class="summary-wh"><div class="summary-wh-name">🏬 ${escapeHtml(w)}</div>${rows}</div>`;
+    }).join('');
+    const dateLabel = d === '(be datos)' ? 'Be datos' : formatDate(d);
+    const evNames = evs.map((e) => escapeHtml(e.name)).join(', ');
+    return `<div class="summary-card">
+        <div class="summary-date">📅 ${dateLabel} <span class="summary-total">${totalQty} vnt.</span></div>
+        <div class="summary-events">${evNames}</div>
+        ${conflictHtml}
+        ${whHtml}
+      </div>`;
+  }).join('');
+}
+
 // --- Rendering: catalog --------------------------------------------------
 function renderCatalog() {
   const cat = data.catalog;
@@ -341,7 +439,7 @@ function renderCatalog() {
       + gi.map((c) => `
         <li class="catalog-row" data-id="${c.id}">
           <span class="cat-name">${escapeHtml(c.name)}</span>
-          <span class="cat-wh">${escapeHtml(c.warehouse || '')}</span>
+          <span class="cat-wh">${escapeHtml(c.warehouse || '')}${Number(c.stock) > 0 ? ` · turim ${Number(c.stock)}` : ''}</span>
           <button class="del-btn" data-action="delCatalog" aria-label="Ištrinti">✕</button>
         </li>`).join('');
   }).join('');
@@ -395,6 +493,7 @@ el.eventList.addEventListener('click', (e) => {
 
 el.backBtn.addEventListener('click', showEvents);
 el.openCatalogBtn.addEventListener('click', showCatalog);
+el.openSummaryBtn.addEventListener('click', showSummary);
 
 // --- Actions: add item (su katalogo autopildymu) -------------------------
 el.equipment.addEventListener('change', () => {
@@ -464,10 +563,12 @@ el.addCatalogForm.addEventListener('submit', (e) => {
     id: uid(), name,
     category: el.catCategory.value || '',
     warehouse: el.catWarehouse.value.trim(),
+    stock: Math.max(0, parseInt(el.catStock.value, 10) || 0),
   });
   save();
   el.catName.value = '';
   el.catWarehouse.value = '';
+  el.catStock.value = '';
   fillCategorySelect(el.catCategory, '');
   refreshDatalists();
   renderCatalog();
