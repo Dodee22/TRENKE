@@ -25,6 +25,10 @@
   <main>
     <!-- ============ RENGINIŲ SĄRAŠAS ============ -->
     <section id="eventsView">
+      <div class="nav-row">
+        <button id="openCatalogBtn" class="nav-btn">📚 Katalogas</button>
+      </div>
+
       <div class="add-card">
         <h2>Pridėti renginį</h2>
         <form id="addEventForm">
@@ -69,12 +73,19 @@
           </label>
           <label>
             <span>Įranga</span>
-            <input type="text" id="equipment" placeholder="pvz. Gręžtuvas" autocomplete="off" required>
+            <input type="text" id="equipment" list="catalogNames" placeholder="pvz. LED P3.9 kabinetas" autocomplete="off" required>
+            <datalist id="catalogNames"></datalist>
           </label>
-          <label>
-            <span>Kiekis</span>
-            <input type="number" id="quantity" inputmode="numeric" min="1" step="1" value="1" required>
-          </label>
+          <div class="field-pair">
+            <label>
+              <span>Kiekis</span>
+              <input type="number" id="quantity" inputmode="numeric" min="1" step="1" value="1" required>
+            </label>
+            <label>
+              <span>Kategorija</span>
+              <select id="itemCategory"></select>
+            </label>
+          </div>
           <button type="submit" class="add-btn">+ Pridėti į sąrašą</button>
         </form>
       </div>
@@ -104,6 +115,38 @@
         </p>
       </section>
     </section>
+
+    <!-- ============ ĮRANGOS KATALOGAS ============ -->
+    <section id="catalogView" hidden>
+      <div class="add-card">
+        <h2>Pridėti į katalogą</h2>
+        <form id="addCatalogForm">
+          <label>
+            <span>Pavadinimas</span>
+            <input type="text" id="catName" placeholder="pvz. L-Acoustics K2" autocomplete="off" required>
+          </label>
+          <div class="field-pair">
+            <label>
+              <span>Kategorija</span>
+              <select id="catCategory"></select>
+            </label>
+            <label>
+              <span>Numatytas sandėlis</span>
+              <input type="text" id="catWarehouse" list="warehouseList" placeholder="pvz. Vilnius A1" autocomplete="off">
+            </label>
+          </div>
+          <button type="submit" class="add-btn">+ Pridėti į katalogą</button>
+        </form>
+      </div>
+
+      <section class="list-section">
+        <h2>Įrangos katalogas</h2>
+        <ul id="catalogList" class="item-list"></ul>
+        <p id="catalogEmpty" class="empty-state">
+          Katalogas tuščias.<br>Pridėk savo įrangą — vėliau ją greitai rinksies sudarydamas renginius. ⬆️
+        </p>
+      </section>
+    </section>
   </main>
 
   <!-- Redagavimo langelis -->
@@ -117,12 +160,18 @@
         </label>
         <label>
           <span>Įranga</span>
-          <input type="text" id="editEquipment" autocomplete="off" required>
+          <input type="text" id="editEquipment" list="catalogNames" autocomplete="off" required>
         </label>
-        <label>
-          <span>Kiekis</span>
-          <input type="number" id="editQuantity" inputmode="numeric" min="1" step="1" required>
-        </label>
+        <div class="field-pair">
+          <label>
+            <span>Kiekis</span>
+            <input type="number" id="editQuantity" inputmode="numeric" min="1" step="1" required>
+          </label>
+          <label>
+            <span>Kategorija</span>
+            <select id="editCategory"></select>
+          </label>
+        </div>
         <div class="modal-actions">
           <button type="button" id="editCancel" class="ghost-btn">Atšaukti</button>
           <button type="submit" class="add-btn modal-save">Išsaugoti</button>
