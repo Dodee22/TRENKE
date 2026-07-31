@@ -83,6 +83,7 @@
         <div class="list-toolbar">
           <h2>Krovimo sąrašas</h2>
           <div class="toolbar-actions">
+            <button id="groupBtn" class="ghost-btn">Grupuoti: ne</button>
             <button id="filterBtn" class="ghost-btn" data-mode="all">Rodyti: visi</button>
             <button id="clearDoneBtn" class="ghost-btn">Išvalyti pakrautus</button>
           </div>
@@ -104,6 +105,31 @@
       </section>
     </section>
   </main>
+
+  <!-- Redagavimo langelis -->
+  <div id="editModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <h3>Redaguoti įrangą</h3>
+      <form id="editForm">
+        <label>
+          <span>Sandėlis</span>
+          <input type="text" id="editWarehouse" list="warehouseList" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Įranga</span>
+          <input type="text" id="editEquipment" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Kiekis</span>
+          <input type="number" id="editQuantity" inputmode="numeric" min="1" step="1" required>
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="editCancel" class="ghost-btn">Atšaukti</button>
+          <button type="submit" class="add-btn modal-save">Išsaugoti</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <footer class="app-footer">
     <span>Duomenys saugomi jūsų telefone · veikia be interneto</span>

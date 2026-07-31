@@ -9,6 +9,8 @@ const OLD_KEY = 'sandelis-krovimas-v1';
 let data = { events: [] };
 let currentEventId = null;
 let filterMode = 'all'; // all | pending | done
+let groupByWarehouse = false;
+let editingItemId = null;
 
 // --- Persistence ---------------------------------------------------------
 function load() {
@@ -88,6 +90,14 @@ const el = {
   // toolbar
   filterBtn: document.getElementById('filterBtn'),
   clearDoneBtn: document.getElementById('clearDoneBtn'),
+  groupBtn: document.getElementById('groupBtn'),
+  // edit modal
+  editModal: document.getElementById('editModal'),
+  editForm: document.getElementById('editForm'),
+  editWarehouse: document.getElementById('editWarehouse'),
+  editEquipment: document.getElementById('editEquipment'),
+  editQuantity: document.getElementById('editQuantity'),
+  editCancel: document.getElementById('editCancel'),
 };
 
 function currentEvent() {
@@ -111,6 +121,8 @@ function openEvent(id) {
   if (!ev) { showEvents(); return; }
   filterMode = 'all';
   el.filterBtn.textContent = 'Rodyti: visi';
+  el.groupBtn.textContent = groupByWarehouse ? 'Grupuoti: pagal sandėlį' : 'Grupuoti: ne';
+  el.groupBtn.classList.toggle('active', groupByWarehouse);
   el.eventsView.hidden = true;
   el.detailView.hidden = false;
   el.backBtn.hidden = false;
@@ -144,6 +156,7 @@ function eventCardHtml(ev) {
           <span class="event-chevron">›</span>
         </span>
       </button>
+      <button class="icon-btn event-copy" data-action="copyEvent" aria-label="Kopijuoti renginį" title="Kopijuoti">⧉</button>
       <button class="del-btn event-del" data-action="delEvent" aria-label="Ištrinti renginį">✕</button>
     </li>`;
 }
@@ -166,7 +179,20 @@ function renderItems() {
   el.warehouseList.innerHTML = warehouses.map((w) => `<option value="${escapeHtml(w)}">`).join('');
 
   const shown = visibleItems(ev);
-  el.itemList.innerHTML = shown.map(itemRowHtml).join('');
+  if (groupByWarehouse) {
+    const groups = {};
+    shown.forEach((i) => { (groups[i.warehouse] = groups[i.warehouse] || []).push(i); });
+    el.itemList.innerHTML = Object.keys(groups).sort().map((wh) => {
+      const gi = groups[wh];
+      const gdone = gi.filter((i) => i.done).length;
+      return `<li class="wh-group-head">
+          <span class="wh-group-name">🏬 ${escapeHtml(wh)}</span>
+          <span class="wh-group-count ${gdone === gi.length ? 'done' : ''}">${gdone} / ${gi.length}</span>
+        </li>` + gi.map(itemRowHtml).join('');
+    }).join('');
+  } else {
+    el.itemList.innerHTML = shown.map(itemRowHtml).join('');
+  }
   el.itemsEmpty.hidden = ev.items.length !== 0;
 
   const total = ev.items.length;
@@ -182,9 +208,9 @@ function itemRowHtml(item) {
   return `
     <li class="item-row ${item.done ? 'done' : ''}" data-id="${item.id}">
       <button class="item-check ${item.done ? 'checked' : ''}" data-action="toggle" aria-label="Pažymėti pakrautą">${item.done ? '✓' : ''}</button>
-      <span class="item-wh">${escapeHtml(item.warehouse)}</span>
-      <span class="item-eq">${escapeHtml(item.equipment)}</span>
-      <span class="item-qty">${item.quantity}</span>
+      <span class="item-wh" data-action="edit">${escapeHtml(item.warehouse)}</span>
+      <span class="item-eq" data-action="edit">${escapeHtml(item.equipment)}</span>
+      <span class="item-qty" data-action="edit">${item.quantity}</span>
       <button class="del-btn" data-action="delete" aria-label="Ištrinti">✕</button>
     </li>`;
 }
@@ -211,6 +237,27 @@ el.eventList.addEventListener('click', (e) => {
 
   if (btn.dataset.action === 'open') {
     openEvent(id);
+  } else if (btn.dataset.action === 'copyEvent') {
+    const suggested = `${ev.name} (kopija)`;
+    const name = prompt('Naujo renginio pavadinimas:', suggested);
+    if (name === null) return; // atšaukta
+    const finalName = name.trim() || suggested;
+    const copy = {
+      id: uid(),
+      name: finalName,
+      date: ev.date,
+      // Nukopijuojam įrangą, bet varneles nuimam (naujam renginiui dar nepakrauta)
+      items: ev.items.map((i) => ({
+        id: uid(),
+        warehouse: i.warehouse,
+        equipment: i.equipment,
+        quantity: i.quantity,
+        done: false,
+      })),
+    };
+    data.events.unshift(copy);
+    save();
+    renderEvents();
   } else if (btn.dataset.action === 'delEvent') {
     if (confirm(`Ištrinti renginį „${ev.name}" ir visą jo įrangą?`)) {
       data.events = data.events.filter((x) => x.id !== id);
@@ -256,6 +303,8 @@ el.itemList.addEventListener('click', (e) => {
     item.done = !item.done;
     save();
     renderItems();
+  } else if (btn.dataset.action === 'edit') {
+    openEdit(item);
   } else if (btn.dataset.action === 'delete') {
     if (confirm(`Ištrinti „${item.equipment}"?`)) {
       ev.items = ev.items.filter((i) => i.id !== id);
@@ -263,6 +312,52 @@ el.itemList.addEventListener('click', (e) => {
       renderItems();
     }
   }
+});
+
+// --- Redagavimo langelis -------------------------------------------------
+function openEdit(item) {
+  editingItemId = item.id;
+  el.editWarehouse.value = item.warehouse;
+  el.editEquipment.value = item.equipment;
+  el.editQuantity.value = item.quantity;
+  el.editModal.hidden = false;
+  el.editEquipment.focus();
+}
+
+function closeEdit() {
+  editingItemId = null;
+  el.editModal.hidden = true;
+}
+
+el.editForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const ev = currentEvent();
+  if (!ev) return closeEdit();
+  const item = ev.items.find((i) => i.id === editingItemId);
+  if (!item) return closeEdit();
+  const warehouse = el.editWarehouse.value.trim();
+  const equipment = el.editEquipment.value.trim();
+  const quantity = Math.max(1, parseInt(el.editQuantity.value, 10) || 1);
+  if (!warehouse || !equipment) return;
+  item.warehouse = warehouse;
+  item.equipment = equipment;
+  item.quantity = quantity;
+  save();
+  closeEdit();
+  renderItems();
+});
+
+el.editCancel.addEventListener('click', closeEdit);
+el.editModal.addEventListener('click', (e) => {
+  if (e.target === el.editModal) closeEdit(); // paspaudus šalia langelio
+});
+
+// --- Grupavimas ----------------------------------------------------------
+el.groupBtn.addEventListener('click', () => {
+  groupByWarehouse = !groupByWarehouse;
+  el.groupBtn.textContent = groupByWarehouse ? 'Grupuoti: pagal sandėlį' : 'Grupuoti: ne';
+  el.groupBtn.classList.toggle('active', groupByWarehouse);
+  renderItems();
 });
 
 el.filterBtn.addEventListener('click', () => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'sandelis-krovimas-v2';
+const CACHE = 'sandelis-krovimas-v3';
 const ASSETS = [
   './',
   './index.html',
