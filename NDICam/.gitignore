@@ -1,0 +1,4 @@
+local.env
+build/
+NDICam.xcodeproj/
+NDICam/Info.plist

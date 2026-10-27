@@ -1,0 +1,51 @@
+# XcodeGen: `xcodegen generate` -> NDICam.xcodeproj
+# Asmeniniai dalykai (bundle id, team id) čia NEsaugomi: run.sh juos paduoda iš local.env.
+name: NDICam
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    # Numatytieji NDI SDK keliai; run.sh perrašo pagal tai, kur SDK rastas diske.
+    NDI_INCLUDE_DIR: "/Library/NDI SDK for Apple/include"
+    NDI_LIB_DIR: "/Library/NDI SDK for Apple/lib/iOS"
+
+targets:
+  NDICam:
+    type: application
+    platform: iOS
+    sources:
+      - path: NDICam
+    scheme: {}
+    dependencies:
+      - sdk: Accelerate.framework
+      - sdk: VideoToolbox.framework
+      - sdk: libc++.tbd
+    settings:
+      base:
+        PRODUCT_NAME: NDICam
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.ndicam   # perrašoma iš local.env
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        SWIFT_OBJC_BRIDGING_HEADER: NDICam/NDICam-Bridging-Header.h
+        HEADER_SEARCH_PATHS: '"$(NDI_INCLUDE_DIR)"'
+        LIBRARY_SEARCH_PATHS: '"$(NDI_LIB_DIR)"'
+        OTHER_LDFLAGS: -lndi_ios
+        ENABLE_BITCODE: NO
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: NDICam/Info.plist
+      properties:
+        CFBundleDisplayName: NDICam
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSCameraUsageDescription: Kamera reikalinga vaizdui siųsti per NDI
+        NSLocalNetworkUsageDescription: NDI siuntimui tinkle
+        NSBonjourServices:
+          - _ndi._tcp
